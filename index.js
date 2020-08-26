@@ -44,6 +44,8 @@ function employeeSearch() {
                 "Look up employees' pay",
                 "Look up managers in the company",
                 "Add a new employee.",
+                "Add a new Department",
+                "Add a new role",
                 "EXIT"
             ]
         })
@@ -79,6 +81,16 @@ function employeeSearch() {
                     // the function that adds a new employee, department, role and pay
                     addNewEmployee();
                     break;
+
+                case "Add a new Department":
+                // the function that lets the user add a new Department
+                addNewDepartment();
+                break;
+
+                case "Add a new role":
+                    // the function that lets the user add a new role
+                addNewRole();
+                break;
 
                 case "EXIT":
                     // if the user chooses "exit" end the connection 
@@ -223,3 +235,23 @@ function addNewEmployee() {
             });
         });
 }
+
+// a function to add Department
+function addNewDepartment() {
+    inquirer
+        .prompt({
+            type: "input",
+            name: "department_name",
+            message: "What department would you like to add?"
+        }).then(function(err,res){
+            if(err) {
+                console.log("There was an error trying to add a new Department.");
+            }
+            console.table(res);
+            console.log("A new Department was successfully added.");
+            // update the Department table
+            employeeSearch();
+        });
+}
+
+// a function to add a new role
