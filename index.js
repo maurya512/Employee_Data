@@ -257,7 +257,8 @@ function addNewDepartment() {
                 }
                 console.table(res);
                 console.log("A new Department was successfully added.");
-                // update the Department table
+                // updated the Department table
+                updateDepartment();
                 employeeSearch();
             });
         });
@@ -308,3 +309,15 @@ function updateEmployeeData() {
     });
 }
 
+// a function to display the updated department table
+function updateDepartment() {
+    var query = `SELECT * FROM department`;
+    connection.query(query, function(err, res){
+        if(err) {
+            console.log("Department table couldn't be updated.");
+        }
+        console.table(res);
+        console.log("Successfully viewed the updated department table.");
+        employeeSearch();
+    });
+}
