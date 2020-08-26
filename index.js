@@ -118,6 +118,7 @@ function employeeData() {
         }
         console.table(res);
         console.log("All employees were viewed.");
+        employeeSearch();
     });
 }
 
@@ -137,6 +138,7 @@ function empDepartment() {
         }
         console.table(res);
         console.log("All Departments were viewed.");
+        employeeSearch();
     });
 }
 
@@ -156,6 +158,7 @@ function empRole() {
         }
         console.table(res);
         console.log("All Roles were viewed");
+        employeeSearch();
     });
 }
 
@@ -175,6 +178,7 @@ function empPay() {
         }
         console.table(res);
         console.log("All Employees' salary was viewed.");
+        employeeSearch();
     });
 }
 
@@ -196,6 +200,7 @@ function isManager() {
         }
         console.table(res);
         console.log("All managers were viewed.");
+        employeeSearch();
     });
 }
 
@@ -255,3 +260,31 @@ function addNewDepartment() {
 }
 
 // a function to add a new role
+function addNewRole(){
+    inquirer   
+        .prompt({
+            type: "input",
+            name: "title",
+            message: "Describe the new role."
+        },
+        {
+            type: "number",
+            name: "department_id",
+            message: "What is the department id?"
+        },
+        {
+            type: "number",
+            name: "salary",
+            message: "What is the salary for this role?"
+        }
+        ).then(function(err,res){
+            if(err) {
+                console.log("There was an error trying to add a new role.");
+            }
+            console.table(res);
+            console.log("A new role was added to the database.");
+            // update the role database
+            employeeSearch();
+        });
+
+}
