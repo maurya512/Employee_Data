@@ -21,8 +21,8 @@ var connection = mysql.createConnection({
 });
 
 // check if the connection has been made and if made run the function
-connection.connect(function(err){
-    if(err){
+connection.connect(function (err) {
+    if (err) {
         // if no connection has been made let us know
         console.log(err);
     }
@@ -49,18 +49,18 @@ function employeeSearch() {
                 "EXIT"
             ]
         })
-        .then(function(choice){
-            switch(choice.employees){
+        .then(function (choice) {
+            switch (choice.employees) {
                 case "Look up all the employees in the company.":
                     // the function that displays all of the employees within a company 
                     employeeData();
                     break;
-                
+
                 case "Look up employees' department.":
                     // the function that displays the department of employee within the company
                     empDepartment();
                     break;
-                
+
                 case "Look up employees' role.":
                     // the function that displays the employee's role in the company
                     // something to do with the id
@@ -71,7 +71,7 @@ function employeeSearch() {
                     // the function that displays the employee's pay 
                     empPay();
                     break;
-                
+
                 case "Look up managers in the company":
                     // the function that displays which employees are managers
                     isManager();
@@ -83,14 +83,14 @@ function employeeSearch() {
                     break;
 
                 case "Add a new Department":
-                // the function that lets the user add a new Department
-                addNewDepartment();
-                break;
+                    // the function that lets the user add a new Department
+                    addNewDepartment();
+                    break;
 
                 case "Add a new role":
                     // the function that lets the user add a new role
-                addNewRole();
-                break;
+                    addNewRole();
+                    break;
 
                 case "EXIT":
                     // if the user chooses "exit" end the connection 
@@ -103,7 +103,7 @@ function employeeSearch() {
 // the function that queries all of the employee in the company's database
 function employeeData() {
     // create a new table by combining all the columns from multiple tables using join
-    var query = `SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, ' ', m.last_name)` ;
+    var query = `SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, ' ', m.last_name)`;
     query += `AS manager FROM employee e`;
     query += `
     LEFT JOIN role r
@@ -112,7 +112,7 @@ function employeeData() {
     ON d.id = r.department_id
     LEFT JOIN employee m
       ON m.id = e.manager_id`;
-    connection.query(query,function(err,res){
+    connection.query(query, function (err, res) {
         if (err) {
             console.log("Error trying to get all employees");
         }
@@ -132,7 +132,7 @@ function empDepartment() {
       ON d.id = r.department_id
       LEFT JOIN employee m
         ON m.id = e.manager_id`;
-    connection.query(query, function(err,res){
+    connection.query(query, function (err, res) {
         if (err) {
             console.log("Error trying to access the departments.");
         }
@@ -152,8 +152,8 @@ function empRole() {
       ON d.id = r.department_id
       LEFT JOIN employee m
         ON m.id = e.manager_id`;
-    connection.query(query, function(err, res){
-        if(err) {
+    connection.query(query, function (err, res) {
+        if (err) {
             console.log("Error trying to get employee's roles");
         }
         console.table(res);
@@ -172,8 +172,8 @@ function empPay() {
       ON d.id = r.department_id
       LEFT JOIN employee m
         ON m.id = e.manager_id`;
-    connection.query(query, function(err, res){
-        if(err) {
+    connection.query(query, function (err, res) {
+        if (err) {
             console.log("Error trying to get employee's pay");
         }
         console.table(res);
@@ -194,8 +194,8 @@ function isManager() {
       LEFT JOIN employee m
         ON m.id = e.manager_id
     WHERE e.manager_id IS NOT NULL`;
-    connection.query(query,function(err,res){
-        if(err) {
+    connection.query(query, function (err, res) {
+        if (err) {
             console.log("There was error trying to see which employee is a manager.");
         }
         console.table(res);
@@ -212,25 +212,25 @@ function addNewEmployee() {
             name: "first_name",
             message: "What is the employee's first name?"
         },
-        {
-            type: "input",
-            name: "last_name",
-            message: "What is the employee's last name?"
-        },
-        {
-            type: "input",
-            name: "role_id",
-            message: "What is the employee's role id?"
-        },
-        {
-            type: "input",
-            name: "manager_id",
-            message: "What is the employee's manager id?"
-        }
-        ).then(function(answer){
+            {
+                type: "input",
+                name: "last_name",
+                message: "What is the employee's last name?"
+            },
+            {
+                type: "input",
+                name: "role_id",
+                message: "What is the employee's role id?"
+            },
+            {
+                type: "input",
+                name: "manager_id",
+                message: "What is the employee's manager id?"
+            }
+        ).then(function (answer) {
             var query = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (? ? ? ?)`;
-            connection.query(query, [answer.first_name], [answer.last_name], [answer.role_id], [answer.manager_id], function(err,res){
-                if(err) {
+            connection.query(query, [answer.first_name], [answer.last_name], [answer.role_id], [answer.manager_id], function (err, res) {
+                if (err) {
                     console.log("There was an error trying to add employee.");
                 }
                 console.table(res);
@@ -248,43 +248,48 @@ function addNewDepartment() {
             type: "input",
             name: "department_name",
             message: "What department would you like to add?"
-        }).then(function(err,res){
-            if(err) {
-                console.log("There was an error trying to add a new Department.");
-            }
-            console.table(res);
-            console.log("A new Department was successfully added.");
-            // update the Department table
-            employeeSearch();
+        }).then(function (answer) {
+            var query = `INSERT INTO deparment (name) VALUES`;
+            connection.query(query, [answer.department_name], function (err, res) {
+                if (err) {
+                    console.log("There was an error trying to add a new Department.");
+                }
+                console.table(res);
+                console.log("A new Department was successfully added.");
+                // update the Department table
+                employeeSearch();
+            });
         });
 }
 
 // a function to add a new role
-function addNewRole(){
-    inquirer   
+function addNewRole() {
+    inquirer
         .prompt({
             type: "input",
             name: "title",
             message: "Describe the new role."
         },
-        {
-            type: "number",
-            name: "department_id",
-            message: "What is the department id?"
-        },
-        {
-            type: "number",
-            name: "salary",
-            message: "What is the salary for this role?"
-        }
-        ).then(function(err,res){
-            if(err) {
-                console.log("There was an error trying to add a new role.");
+            {
+                type: "number",
+                name: "department_id",
+                message: "What is the department id?"
+            },
+            {
+                type: "number",
+                name: "salary",
+                message: "What is the salary for this role?"
             }
-            console.table(res);
-            console.log("A new role was added to the database.");
-            // update the role database
-            employeeSearch();
+        ).then(function (answer) {
+            var query = `INSERT INTO role (title, department_id, salary) VALUES (? ? ?)`;
+            connection.query(query, [answer.title], [answer.department_id], [answer.salary], function (err, res) {
+                if (err) {
+                    console.log("There was an error trying to add a new role.");
+                }
+                console.table(res);
+                console.log("A new role was added to the database.");
+                // update the role database
+                employeeSearch();
+            });
         });
-
 }
