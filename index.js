@@ -188,3 +188,38 @@ function isManager() {
 }
 
 // a function to add new employee
+function addNewEmployee() {
+    inquirer
+        .prompt({
+            type: "input",
+            name: "first_name",
+            message: "What is the employee's first name?"
+        },
+        {
+            type: "input",
+            name: "last_name",
+            message: "What is the employee's last name?"
+        },
+        {
+            type: "input",
+            name: "role_id",
+            message: "What is the employee's role id?"
+        },
+        {
+            type: "input",
+            name: "manager_id",
+            message: "What is the employee's manager id?"
+        }
+        ).then(function(answer){
+            var query = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (? ? ? ?)`;
+            connection.query(query, [answer.first_name], [answer.last_name], [answer.role_id], [answer.manager_id], function(err,res){
+                if(err) {
+                    console.log("There was an error trying to add employee.");
+                }
+                console.table(res);
+                console.log("Employee was successfully added to the database");
+                // maybe update the database
+                employeeSearch();
+            });
+        });
+}
