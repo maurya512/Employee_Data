@@ -39,9 +39,9 @@ function employeeSearch() {
             message: "What would you like to do?",
             choices: [
                 "Look up all the employees in the company.",
-                "Look up an employee's department.",
-                "Look up an employee's role.",
-                "Look up an employee's pay",
+                "Look up employees' department.",
+                "Look up employees' role.",
+                "Look up employees' pay",
                 "Add a new employee.",
                 "EXIT"
             ]
@@ -53,18 +53,18 @@ function employeeSearch() {
                     employeeData();
                     break;
                 
-                case "Look up an employee's department.":
+                case "Look up employees' department.":
                     // the function that displays the department of employee within the company
                     empDepartment();
                     break;
                 
-                case "Look up an employee's role.":
+                case "Look up employees' role.":
                     // the function that displays the employee's role in the company
                     // something to do with the id
                     empRole();
                     break;
 
-                case "Look up an employee's pay":
+                case "Look up employees' pay":
                     // the function that displays the employee's pay 
                     empPay();
                     break;
@@ -80,6 +80,46 @@ function employeeSearch() {
 
             }
         });
+}
+
+// the function that queries all of the employee in the company's database
+function employeeData() {
+    // create a new table by combining all the columns from multiple tables using join
+    var query = `SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, ' ', m.last_name)` ;
+    query += `AS manager FROM employee e`;
+    query += `
+    LEFT JOIN role r
+      ON e.role_id = r.id
+    LEFT JOIN department d
+    ON d.id = r.department_id
+    LEFT JOIN employee m
+      ON m.id = e.manager_id`;
+    connection.query(query,function(err,res){
+        if (err) {
+            console.log("Error trying to get all employees");
+        }
+        console.table(res);
+        console.log("All employees were viewed.");
+    });
+}
+
+// function that queries the deparment of each the employee the user wants to search
+function empDepartment() {
+    var query = `SELECT d.id, d.name AS Department, r.salary AS salary 
+    FROM employee e
+    LEFT JOIN role r
+        ON e.role_id = r.id
+      LEFT JOIN department d
+      ON d.id = r.department_id
+      LEFT JOIN employee m
+        ON m.id = e.manager_id`;
+    connection.query(query, function(err,res){
+        if (err) {
+            console.log("Error trying to access the departments.");
+        }
+        console.table(res);
+        console.log("All Departments were viewed.");
+    });
 }
 
 // 
