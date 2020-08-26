@@ -235,7 +235,8 @@ function addNewEmployee() {
                 }
                 console.table(res);
                 console.log("Employee was successfully added to the database");
-                // maybe update the database
+                // display the updated the database
+                updateEmployeeData();
                 employeeSearch();
             });
         });
@@ -293,3 +294,17 @@ function addNewRole() {
             });
         });
 }
+
+// a function to display the updated employee table
+function updateEmployeeData() {
+    var query = `SELECT * FROM employee`;
+    connection.query(query, function(err,res){
+        if(err) {
+            console.log("Employee table couldn't be update.");
+        }
+        console.table(res);
+        console.log("Successfully viewed the updated employee table.");
+        employeeSearch();
+    });
+}
+
