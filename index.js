@@ -291,6 +291,7 @@ function addNewRole() {
                 console.table(res);
                 console.log("A new role was added to the database.");
                 // update the role database
+                updateRole();
                 employeeSearch();
             });
         });
@@ -320,4 +321,17 @@ function updateDepartment() {
         console.log("Successfully viewed the updated department table.");
         employeeSearch();
     });
+}
+
+// a function to display the updated the role table
+function updateRole() {
+    var query = `SELECT * FROM role`;
+    connection.query(query, function(err, res){
+        if(err) {
+            console.log("Role table couldn't be updated.");
+        }
+        console.table(res);
+        console.log("Successfully viewed the updated role table");
+        employeeSearch();
+    })
 }
