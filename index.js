@@ -42,6 +42,7 @@ function employeeSearch() {
                 "Look up employees' department.",
                 "Look up employees' role.",
                 "Look up employees' pay",
+                "Look up managers in the company",
                 "Add a new employee.",
                 "EXIT"
             ]
@@ -67,6 +68,11 @@ function employeeSearch() {
                 case "Look up employees' pay":
                     // the function that displays the employee's pay 
                     empPay();
+                    break;
+                
+                case "Look up managers in the company":
+                    // the function that displays which employees are managers
+                    isManager();
                     break;
 
                 case "Add a new employee.":
@@ -160,4 +166,25 @@ function empPay() {
     });
 }
 
-// 
+// a function to see if the employee is a manager in the company
+
+function isManager() {
+    var query = `SELECT CONCAT (e.first_name, ' ', e.last_name) AS Manager, r.title, r.salary 
+    FROM employee e 
+    LEFT JOIN role r
+        ON e.role_id = r.id
+      LEFT JOIN department d
+      ON d.id = r.department_id
+      LEFT JOIN employee m
+        ON m.id = e.manager_id
+    WHERE e.manager_id IS NOT NULL`;
+    connection.query(query,function(err,res){
+        if(err) {
+            console.log("There was error trying to see which employee is a manager.");
+        }
+        console.table(res);
+        console.log("All managers were viewed.");
+    });
+}
+
+// a function to add new employee
