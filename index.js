@@ -47,6 +47,7 @@ function employeeSearch() {
                 "Add a new Department",
                 "Add a new role",
                 // "Remove Employee",
+                "Update Employee Info",
                 "Show updated database",
                 "EXIT"
             ]
@@ -98,6 +99,11 @@ function employeeSearch() {
                 //     // the function that lets the user remove Employee
                 //     rmEmployee();
                 //     break;
+
+                case "Update Employee Info":
+                    // the function that lets the user update Employee Info
+                    updateDatabase();
+                    break;
 
                 case "Show updated database":
                     // the function that lets the user display update database
@@ -362,7 +368,27 @@ function updatedDB() {
     });
 }
 
-
+function updateDatabase() {
+    inquirer
+        .prompt([
+            {
+                type: "input",
+                name: "empUpdate",
+                message: "Which employee would you like to update?"
+            },
+            {
+                type: "input",
+                name: "updateRole",
+                message: "What role do you want to update to?"
+            }
+        ]).then(function (answer) {
+            connection.query('UPDATE employee SET role id=? WHERE first_name = ?', [answer.updateRole], [answer.empUpdate], function (err) {
+                if (err) throw err;
+                console.log("Successfully updated the database.");
+                employeeSearch();
+            });
+        })
+}
 // a function to delete employee from the datbase
 // function rmEmployee() {
 //     inquirer.prompt([
