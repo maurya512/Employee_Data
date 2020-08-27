@@ -4,28 +4,28 @@
 // modules 
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+const { config } = require("process");
+require("console.table");
 
 // create a connection with the database
 var connection = mysql.createConnection({
     host: "localhost",
 
     // port
-    port: 8080,
+    port: 3306,
 
     // username
     user: "root",
 
     // password
-    password: process.env.MYSQL_KEY,
+    password: "enph739ektA!",
     database: "employees"
 });
 
 // check if the connection has been made and if made run the function
 connection.connect(function (err) {
-    if (err) {
-        // if no connection has been made let us know
-        console.log(err);
-    }
+    if (err) throw err;
+    // if no connection has been made let us know
     // else run the function
     employeeSearch();
 });
@@ -34,8 +34,8 @@ connection.connect(function (err) {
 function employeeSearch() {
     inquirer
         .prompt({
-            type: "rawlist",
-            name: "employees",
+            type: "list",
+            name: "company",
             message: "What would you like to do?",
             choices: [
                 "Look up all the employees in the company.",
@@ -46,11 +46,13 @@ function employeeSearch() {
                 "Add a new employee.",
                 "Add a new Department",
                 "Add a new role",
+                // "Remove Employee",
+                "Show updated database",
                 "EXIT"
             ]
         })
-        .then(function (choice) {
-            switch (choice.employees) {
+        .then(function (answer) {
+            switch (answer.company) {
                 case "Look up all the employees in the company.":
                     // the function that displays all of the employees within a company 
                     employeeData();
@@ -92,6 +94,16 @@ function employeeSearch() {
                     addNewRole();
                     break;
 
+                // case "Remove Employee":
+                //     // the function that lets the user remove Employee
+                //     rmEmployee();
+                //     break;
+
+                case "Show updated database":
+                    // the function that lets the user display update database
+                    updatedDB();
+                    break;
+
                 case "EXIT":
                     // if the user chooses "exit" end the connection 
                     connection.end();
@@ -103,9 +115,7 @@ function employeeSearch() {
 // the function that queries all of the employee in the company's database
 function employeeData() {
     // create a new table by combining all the columns from multiple tables using join
-    var query = `SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, ' ', m.last_name)`;
-    query += `AS manager FROM employee e`;
-    query += `
+    var query = `SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, ' ', m.last_name) AS manager FROM employee e
     LEFT JOIN role r
       ON e.role_id = r.id
     LEFT JOIN department d
@@ -113,9 +123,8 @@ function employeeData() {
     LEFT JOIN employee m
       ON m.id = e.manager_id`;
     connection.query(query, function (err, res) {
-        if (err) {
-            console.log("Error trying to get all employees");
-        }
+        if (err) throw err;
+        // console.log("Error trying to get all employees");
         console.table(res);
         console.log("All employees were viewed.");
         employeeSearch();
@@ -133,9 +142,7 @@ function empDepartment() {
       LEFT JOIN employee m
         ON m.id = e.manager_id`;
     connection.query(query, function (err, res) {
-        if (err) {
-            console.log("Error trying to access the departments.");
-        }
+        if (err) throw err;
         console.table(res);
         console.log("All Departments were viewed.");
         employeeSearch();
@@ -207,11 +214,12 @@ function isManager() {
 // a function to add new employee
 function addNewEmployee() {
     inquirer
-        .prompt({
-            type: "input",
-            name: "first_name",
-            message: "What is the employee's first name?"
-        },
+        .prompt([
+            {
+                type: "input",
+                name: "first_name",
+                message: "What is the employee's first name?"
+            },
             {
                 type: "input",
                 name: "last_name",
@@ -227,81 +235,90 @@ function addNewEmployee() {
                 name: "manager_id",
                 message: "What is the employee's manager id?"
             }
-        ).then(function (answer) {
-            var query = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (? ? ? ?)`;
-            connection.query(query, [answer.first_name], [answer.last_name], [answer.role_id], [answer.manager_id], function (err, res) {
-                if (err) {
-                    console.log("There was an error trying to add employee.");
-                }
-                console.table(res);
-                console.log("Employee was successfully added to the database");
-                // display the updated the database
-                updateEmployeeData();
-                employeeSearch();
-            });
+        ]).then(function (res) {
+            connection.query("INSERT INTO employee SET ?", {
+                first_name: res.first_name,
+                last_name: res.last_name,
+                role_id: res.role_id,
+                manager_id: res.manager_id
+            },
+                function (err) {
+                    if (err) throw err;
+                    console.log("Employee successfully added.");
+                    updateEmployeeData();
+                    employeeSearch();
+                });
         });
 }
 
 // a function to add Department
 function addNewDepartment() {
     inquirer
-        .prompt({
-            type: "input",
-            name: "department_name",
-            message: "What department would you like to add?"
-        }).then(function (answer) {
-            var query = `INSERT INTO deparment (name) VALUES`;
-            connection.query(query, [answer.department_name], function (err, res) {
-                if (err) {
-                    console.log("There was an error trying to add a new Department.");
-                }
-                console.table(res);
-                console.log("A new Department was successfully added.");
-                // updated the Department table
-                updateDepartment();
-                employeeSearch();
+        .prompt(
+            [{
+                type: "input",
+                name: "department_name",
+                message: "What department would you like to add?"
+            }
+            ]).then(function (answer) {
+                connection.query("INSERT INTO department SET ?",
+                    {
+                        name: answer.department_name,
+                    },
+                    function (err) {
+                        if (err) throw err;
+                        console.log("Department successfully added.");
+                        updateDepartment();
+                        employeeSearch();
+                    });
             });
-        });
 }
 
 // a function to add a new role
 function addNewRole() {
     inquirer
-        .prompt({
-            type: "input",
-            name: "title",
-            message: "Describe the new role."
-        },
+        .prompt([
             {
-                type: "number",
+                type: "input",
+                name: "title",
+                message: "Describe the new role."
+            },
+            {
+                type: "input",
                 name: "department_id",
                 message: "What is the department id?"
             },
             {
-                type: "number",
+                type: "input",
                 name: "salary",
-                message: "What is the salary for this role?"
-            }
-        ).then(function (answer) {
-            var query = `INSERT INTO role (title, department_id, salary) VALUES (? ? ?)`;
-            connection.query(query, [answer.title], [answer.department_id], [answer.salary], function (err, res) {
-                if (err) {
-                    console.log("There was an error trying to add a new role.");
+                message: "What is the salary for this role?",
+                validate: function (value) {
+                    if (isNaN(value) === false) {
+                        return true;
+                    }
+                    return false;
                 }
-                console.table(res);
-                console.log("A new role was added to the database.");
-                // update the role database
-                updateRole();
-                employeeSearch();
-            });
+            }
+        ]).then(function (res) {
+            connection.query("INSERT INTO role SET ?", {
+                title: res.title,
+                department_id: res.department_id,
+                salary: res.salary
+            },
+                function (err) {
+                    if (err) throw err;
+                    console.log("Role was added.");
+                    updateRole();
+                    employeeSearch();
+                });
         });
 }
 
 // a function to display the updated employee table
 function updateEmployeeData() {
     var query = `SELECT * FROM employee`;
-    connection.query(query, function(err,res){
-        if(err) {
+    connection.query(query, function (err, res) {
+        if (err) {
             console.log("Employee table couldn't be update.");
         }
         console.table(res);
@@ -313,8 +330,8 @@ function updateEmployeeData() {
 // a function to display the updated department table
 function updateDepartment() {
     var query = `SELECT * FROM department`;
-    connection.query(query, function(err, res){
-        if(err) {
+    connection.query(query, function (err, res) {
+        if (err) {
             console.log("Department table couldn't be updated.");
         }
         console.table(res);
@@ -326,12 +343,42 @@ function updateDepartment() {
 // a function to display the updated the role table
 function updateRole() {
     var query = `SELECT * FROM role`;
-    connection.query(query, function(err, res){
-        if(err) {
+    connection.query(query, function (err, res) {
+        if (err) {
             console.log("Role table couldn't be updated.");
         }
         console.table(res);
         console.log("Successfully viewed the updated role table");
         employeeSearch();
+    });
+}
+
+function updatedDB() {
+    var query = `select * from employee`;
+    connection.query(query, function (err, res) {
+        if (err) throw err;
+        console.table(res);
+        employeeSearch();
     })
 }
+// a function to delete employee from the datbase
+// function rmEmployee() {
+//     inquirer.prompt([
+//         {
+//             type: "input",
+//             name: "firstName",
+//             meesage: "What is the first name of the employee you want to delete?"
+//         },
+//         {
+//             type: "input",
+//             name: "lastName",
+//             message: "What is the last name of the employee you want to delete?"
+//         }
+//     ]).then(function(res){
+//         var query = `DELETE FROM employee WHERE first_name = ${res.firstName} AND last_name = ${res.lastName}`;
+//         connection.query(query, function(err){
+//             if (err) throw err;
+//             console.log("Employee Successfully removed.");
+//         });
+//     });
+// }
