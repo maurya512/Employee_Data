@@ -9,7 +9,6 @@ In this project we will work with nodejs, mysql and other features to track empl
 - [Project Original Contributor](#Deployer)
 - [Project Contributors](#Contributors)
 - [Github Repo](#Repo)
-- [Demo Link](#Demo)
 - [Project Questions](#Questions)
 
 # Description:
@@ -37,9 +36,6 @@ In this project we will work with nodejs, mysql and other features to track empl
 
 # Repo:
 - [Repo](https://github.com/maurya512/Employee_Data)
-
-# Demo:
-- [Link]()
 
 # Questions:
   Any questions regarding this project can be directed at:
