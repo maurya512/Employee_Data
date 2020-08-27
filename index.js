@@ -359,8 +359,10 @@ function updatedDB() {
         if (err) throw err;
         console.table(res);
         employeeSearch();
-    })
+    });
 }
+
+
 // a function to delete employee from the datbase
 // function rmEmployee() {
 //     inquirer.prompt([
