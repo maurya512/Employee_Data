@@ -46,7 +46,7 @@ function employeeSearch() {
                 "Add a new employee.",
                 "Add a new Department",
                 "Add a new role",
-                // "Remove Employee",
+                "Remove Employee",
                 "Update Employee Info",
                 "Show updated database",
                 "EXIT"
@@ -95,10 +95,10 @@ function employeeSearch() {
                     addNewRole();
                     break;
 
-                // case "Remove Employee":
-                //     // the function that lets the user remove Employee
-                //     rmEmployee();
-                //     break;
+                case "Remove Employee":
+                // //     // the function that lets the user remove Employee
+                    rmEmployee();
+                    break;
 
                 case "Update Employee Info":
                     // the function that lets the user update Employee Info
@@ -242,18 +242,13 @@ function addNewEmployee() {
                 message: "What is the employee's manager id?"
             }
         ]).then(function (res) {
-            connection.query("INSERT INTO employee SET ?", {
-                first_name: res.first_name,
-                last_name: res.last_name,
-                role_id: res.role_id,
-                manager_id: res.manager_id
-            },
-                function (err) {
-                    if (err) throw err;
-                    console.log("Employee successfully added.");
-                    updateEmployeeData();
-                    employeeSearch();
-                });
+            var query = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
+            connection.query(query, [res.first_name, res.last_name, res.role_id, res.manager_id],function(err){
+                if (err) throw err;
+                console.log("Successfully added a new employee.");
+                updateEmployeeData();
+                employeeSearch();
+            });
         });
 }
 
@@ -267,16 +262,13 @@ function addNewDepartment() {
                 message: "What department would you like to add?"
             }
             ]).then(function (answer) {
-                connection.query("INSERT INTO department SET ?",
-                    {
-                        name: answer.department_name,
-                    },
-                    function (err) {
-                        if (err) throw err;
-                        console.log("Department successfully added.");
-                        updateDepartment();
-                        employeeSearch();
-                    });
+                var query = "INSERT INTO department (name) VALUE (?)";
+                connection.query(query, answer.department_name, function(err){
+                    if (err) throw err;
+                    console.log(`Successfully added: ${answer.department_name}`);
+                    updateDepartment();
+                    employeeSearch();
+                });
             });
 }
 
@@ -293,30 +285,27 @@ function addNewRole() {
                 type: "input",
                 name: "department_id",
                 message: "What is the department id?"
+                // choices: [1,2,3,4]
             },
             {
                 type: "input",
                 name: "salary",
                 message: "What is the salary for this role?",
-                validate: function (value) {
-                    if (isNaN(value) === false) {
-                        return true;
-                    }
-                    return false;
-                }
+                // validate: function (value) {
+                //     if (isNaN(value) === false) {
+                //         return true;
+                //     }
+                //     return false;
+                // }
             }
         ]).then(function (res) {
-            connection.query("INSERT INTO role SET ?", {
-                title: res.title,
-                department_id: res.department_id,
-                salary: res.salary
-            },
-                function (err) {
-                    if (err) throw err;
-                    console.log("Role was added.");
-                    updateRole();
-                    employeeSearch();
-                });
+            var query = "INSERT INTO role (title, department_id, salary) VALUES (?, ?, ?)";
+            connection.query(query, [res.title, res.department_id, res.salary], function(err) {
+                if (err) throw err;
+                console.log(`Successfully added role: ${res.title}`);
+                updateRole();
+                employeeSearch();
+            });
         });
 }
 
@@ -373,40 +362,62 @@ function updateDatabase() {
         .prompt([
             {
                 type: "input",
-                name: "empUpdate",
-                message: "Which employee would you like to update?"
+                name: "empID",
+                message: "enter the ID of the employee you want to update."
             },
             {
                 type: "input",
-                name: "updateRole",
-                message: "What role do you want to update to?"
+                name: "newTitle",
+                message: "Enter the new title"
+            },
+            {
+                type: "input",
+                name: "newSalary",
+                message: "Enter the new salary"
+            },
+            {
+                type: "input",
+                name: "newDeptID",
+                message: "Enter the new department ID."
             }
         ]).then(function (answer) {
-            connection.query('UPDATE employee SET role id=? WHERE first_name = ?', [answer.updateRole], [answer.empUpdate], function (err) {
+            var query = "UPDATE role SET title = ?, salary = ?, department_id = ? WHERE id = ?";
+            connection.query(query, [answer.newTitle, answer.newSalary, answer.newDeptID, parseInt(answer.empID)], function(err){
                 if (err) throw err;
-                console.log("Successfully updated the database.");
+                console.log("Successfully updated the employee.");
+                updateRole();
                 employeeSearch();
             });
         })
 }
 // a function to delete employee from the datbase
-// function rmEmployee() {
-//     inquirer.prompt([
-//         {
-//             type: "input",
-//             name: "firstName",
-//             meesage: "What is the first name of the employee you want to delete?"
-//         },
-//         {
-//             type: "input",
-//             name: "lastName",
-//             message: "What is the last name of the employee you want to delete?"
-//         }
-//     ]).then(function(res){
-//         var query = `DELETE FROM employee WHERE first_name = ${res.firstName} AND last_name = ${res.lastName}`;
-//         connection.query(query, function(err){
-//             if (err) throw err;
-//             console.log("Employee Successfully removed.");
-//         });
-//     });
-// }
+function rmEmployee() {
+    var empId = "SELECT * FROM employee ORDER BY id"
+    connection.query(empId,function(err,res){
+        if (err) throw err;
+        var empArr = [];
+        for(var i = 0; i < res.length; i++){
+            empArr.push(res[i].id+ " " + res[i].first_name + " " + res[i].last_name);
+        }
+        console.log(empArr);
+    
+    inquirer.prompt([
+        {
+            type: "list",
+            message: "Please choose which employee you want to remove!",
+            choices: empArr,
+            name: "rmEmp"
+
+        }
+    ]).then(function(res){
+        var parse = parseInt(res.rmEmp.split(" "));
+        var query = `DELETE FROM employee WHERE id = ${parse}`;
+        connection.query(query, function(err){
+            if (err) throw err;
+            console.log("Employee Successfully removed.");
+            employeeSearch();
+        });
+    })
+    });
+}
+// rmEmployee();
