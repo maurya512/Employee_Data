@@ -5,7 +5,15 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 const { config } = require("process");
+const logo = require("asciiart-logo");
 require("console.table");
+display();
+
+// a function that displays employee manager
+function display() {
+    const logoText = logo({name: "Employee Manager"}).render();
+    console.log(logoText);
+}
 
 // create a connection with the database
 var connection = mysql.createConnection({
